@@ -32,7 +32,32 @@ async function readUrl(req, res) {
             return;
         }
 
-        res.send(url);        
+        res.send(url);
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+}
+
+async function openUrl(req, res) {
+    const { shortUrl } = req.params;
+    if (!shortUrl) {
+        res.sendStatus(404);
+        return;
+    }
+
+    try {
+        const url = (await connection.query(`SELECT id, url FROM urls WHERE "shortUrl" = $1;`, [shortUrl])).rows[0];
+
+        if (!url) {
+            res.sendStatus(404);
+            return;
+        }
+
+        await connection.query(`INSERT INTO visits ("urlId") VALUES ($1);`, [url.id]);
+
+        res.redirect(url.url);
+
     } catch (error) {
         console.log(error);
         res.sendStatus(500);
@@ -41,5 +66,6 @@ async function readUrl(req, res) {
 
 export {
     shortUrl,
-    readUrl
+    readUrl,
+    openUrl
 };
