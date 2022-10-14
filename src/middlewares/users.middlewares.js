@@ -27,6 +27,7 @@ async function signUpEmailValidation(req, res, next) {
         const userExist = (await connection.query(`SELECT * FROM users WHERE email = $1;`, [email])).rows[0];
         if (userExist) {
             res.sendStatus(409);
+            return;
         }
 
         next();
@@ -36,7 +37,25 @@ async function signUpEmailValidation(req, res, next) {
     }
 }
 
+async function signInSchemaValidation(req, res, next) {
+    const { email, password } = req.body;
+    const validation = signUpSchema.validate({
+        email,
+        password
+    }, { abortEarly: false });
+
+    if (validation.error) {
+        const errors = validation.error.details.map(error => error.message);
+        res.status(422).send({ message: errors });
+        return;
+    }
+
+    res.locals.body = { email, password };
+    next();
+}
+
 export {
     signUpSchemaValidation,
-    signUpEmailValidation
+    signUpEmailValidation,
+    signInSchemaValidation,
 };
