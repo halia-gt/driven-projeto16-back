@@ -37,7 +37,7 @@ async function signUpEmailValidation(req, res, next) {
     }
 }
 
-async function signInSchemaValidation(req, res, next) {
+function signInSchemaValidation(req, res, next) {
     const { email, password } = req.body;
     const validation = signInSchema.validate({
         email,
