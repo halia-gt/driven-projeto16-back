@@ -1,8 +1,9 @@
 import joi from "joi";
 
-const pattern = "https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)";
+const regexPattern = new RegExp(/(http(s)?:\/\/.)?(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/);
 const urlSchema = joi.object({
-    url: joi.pattern(new RegExp(pattern))
+    url: joi.string()
+        .pattern(regexPattern)
         .required()
 });
 

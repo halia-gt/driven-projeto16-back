@@ -1,8 +1,9 @@
 import { connection } from "../database/index.js";
+import { urlSchema } from "../schemas/urls.schemas.js";
 
 function urlSchemaValidation(req, res, next) {
     const { url } = req.body;
-    const validation = signUpSchema.validate({
+    const validation = urlSchema.validate({
         url
     }, { abortEarly: false });
 
@@ -12,6 +13,8 @@ function urlSchemaValidation(req, res, next) {
         return;
     }
 
-    res.locals.body = { name, email, password, confirmPassword };
+    res.locals.body = { url };
     next();
 }
+
+export { urlSchemaValidation };
