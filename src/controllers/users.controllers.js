@@ -52,5 +52,5 @@ async function singIn(req, res) {
 
 export {
     signUp,
-    singIn
+    singIn,
 };

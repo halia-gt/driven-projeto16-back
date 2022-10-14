@@ -37,7 +37,36 @@ async function nonRepeatedUrlValidation(req, res, next) {
     }
 }
 
+async function userHasUrlValidation(req, res, next) {
+    const { user } = res.locals;
+    const { id } = req.params;
+    if (!id) {
+        res.sendStatus(404);
+        return;
+    }
+
+    try {
+        const url = (await connection.query(`SELECT * FROM urls WHERE id = $1`, [id])).rows[0];
+        if (!url) {
+            res.sendStatus(404);
+            return;
+        }
+        
+        if (user.userId !== url.userId) {
+            res.sendStatus(401);
+            return;
+        }
+
+        res.locals.urlId = id;
+        next();        
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+}
+
 export {
     urlSchemaValidation,
     nonRepeatedUrlValidation,
+    userHasUrlValidation
 };
