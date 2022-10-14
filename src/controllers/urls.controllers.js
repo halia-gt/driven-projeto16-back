@@ -21,6 +21,25 @@ async function shortUrl(req, res) {
     }
 }
 
+async function readUrl(req, res) {
+    const { id } = req.params;
+
+    try {
+        const url = (await connection.query(`SELECT id, "shortUrl", url FROM urls WHERE id = $1;`, [id])).rows[0];
+
+        if (!url) {
+            res.sendStatus(404);
+            return;
+        }
+
+        res.send(url);        
+    } catch (error) {
+        console.log(error);
+        res.sendStatus(500);
+    }
+}
+
 export {
-    shortUrl
+    shortUrl,
+    readUrl
 };

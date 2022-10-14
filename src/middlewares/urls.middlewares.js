@@ -39,5 +39,5 @@ async function nonRepeatedUrlValidation(req, res, next) {
 
 export {
     urlSchemaValidation,
-    nonRepeatedUrlValidation
+    nonRepeatedUrlValidation,
 };
