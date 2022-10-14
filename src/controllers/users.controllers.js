@@ -1,4 +1,5 @@
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 import { connection } from "../database/index.js";
 
 async function signUp(req, res) {
@@ -21,21 +22,28 @@ async function singIn(req, res) {
     const { email, password } = res.locals.body;
 
     try {
-        const userExist = (await connection.query(`SELECT * FROM users WHERE email = $1;`, [email])).rows[0];
-        if (!userExist) {
+        const user = (await connection.query(`SELECT * FROM users WHERE email = $1;`, [email])).rows[0];
+        if (!user) {
             res.sendStatus(401);
             return;
         }
 
-        const isValidPassword = bcrypt.compareSync(password, userExist.passwordHash);
+        const isValidPassword = bcrypt.compareSync(password, user.passwordHash);
         if (!isValidPassword) {
             res.sendStatus(401);
             return;
         }
 
-        
+        const token = jwt.sign({
+            userId: user.id
+        }, process.env.TOKEN_SECRET);
 
-        
+        await connection.query(`INSERT INTO sessions ("userId", token) VALUES ($1, $2);`,[
+            user.id,
+            token
+        ])
+
+        res.status(200).send({ token, name: user.name });
     } catch (error) {
         console.log(error);
         res.sendStatus(500);

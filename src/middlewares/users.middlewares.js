@@ -1,5 +1,5 @@
 import { connection } from "../database/index.js";
-import { signUpSchema } from "../schemas/users.schemas.js";
+import { signInSchema, signUpSchema } from "../schemas/users.schemas.js";
 
 function signUpSchemaValidation(req, res, next) {
     const { name, email, password, confirmPassword } = req.body;
@@ -39,7 +39,7 @@ async function signUpEmailValidation(req, res, next) {
 
 async function signInSchemaValidation(req, res, next) {
     const { email, password } = req.body;
-    const validation = signUpSchema.validate({
+    const validation = signInSchema.validate({
         email,
         password
     }, { abortEarly: false });
