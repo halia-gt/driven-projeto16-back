@@ -47,17 +47,18 @@ async function openUrl(req, res) {
     }
 
     try {
-        const url = (await connection.query(`SELECT id, url FROM urls WHERE "shortUrl" = $1;`, [shortUrl])).rows[0];
+        const url = (await connection.query(`SELECT id, url, "visitCount" FROM urls WHERE "shortUrl" = $1;`, [shortUrl])).rows[0];
 
         if (!url) {
             res.sendStatus(404);
             return;
         }
 
-        await connection.query(`INSERT INTO visits ("urlId") VALUES ($1);`, [url.id]);
+        const visitCount = url.visitCount + 1;
+
+        await connection.query(`UPDATE urls SET "visitCount" = $1 WHERE id = $2;`, [visitCount, url.id]);
 
         res.redirect(url.url);
-
     } catch (error) {
         console.log(error);
         res.sendStatus(500);
