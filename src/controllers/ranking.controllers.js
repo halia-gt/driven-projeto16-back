@@ -1,20 +1,8 @@
-import { connection } from "../database/index.js";
+import { rankRepository } from "../repositories/ranking.repositories.js";
 
 async function rankingUsers(req, res) {
     try {
-        const query =
-            `
-                SELECT users.id,
-                    users.name,
-                    COUNT(urls.id) AS "linksCount",
-                    COALESCE(SUM(urls."visitCount"), 0) AS "visitCount"
-                FROM users
-                LEFT JOIN urls ON urls."userId" = users.id
-                GROUP BY users.id
-                ORDER BY "visitCount" DESC, "linksCount" DESC
-                LIMIT 10;
-            `;
-        const ranks = (await connection.query(query)).rows;
+        const ranks = (await rankRepository.getRanks()).rows;
 
         res.send(ranks);
     } catch (error) {
