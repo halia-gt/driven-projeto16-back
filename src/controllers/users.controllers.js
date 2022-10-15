@@ -6,21 +6,24 @@ async function readUser(req, res) {
 
     try {
         const query = 
-            `
-                SELECT users.id,
-                    users.name,
-                    SUM(urls."visitCount") AS "visitCount",
-                    json_agg(json_build_object(
+        `
+            SELECT users.id,
+                users.name,
+                COALESCE(SUM(urls."visitCount"), 0) AS "visitCount",
+                COALESCE(json_agg(json_build_object(
                         'id', urls.id,
                         'shortUrl', urls."shortUrl",
                         'url', urls.url,
                         'visitCount', urls."visitCount"
-                    )) AS "shortenedUrls"
-                FROM users
-                JOIN urls ON users.id = urls."userId"
-                WHERE users.id = $1
-                GROUP BY users.id;
-            `;
+                    ))
+                    FILTER (WHERE urls."userId" IS NOT NULL),
+                    '[]'
+                ) AS "shortenedUrls"
+            FROM users
+            LEFT JOIN urls ON users.id = urls."userId"
+            WHERE users.id = $1
+            GROUP BY users.id;
+        `;
 
         const user = (await connection.query(query, [id])).rows[0];
         if (!user) {
