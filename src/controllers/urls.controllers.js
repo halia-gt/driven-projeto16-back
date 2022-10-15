@@ -1,5 +1,4 @@
 import { nanoid } from "nanoid";
-import { connection } from "../database/index.js";
 import { urlRepository } from "../repositories/urls.repositories.js";
 
 async function shortUrl(req, res) {

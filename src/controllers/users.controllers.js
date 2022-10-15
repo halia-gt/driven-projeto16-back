@@ -1,31 +1,11 @@
-import { connection } from "../database/index.js";
+import { userRepository } from "../repositories/users.repositories.js";
 
 async function readUser(req, res) {
     const { user } = res.locals;
     const id = user.userId;
 
     try {
-        const query = 
-        `
-            SELECT users.id,
-                users.name,
-                COALESCE(SUM(urls."visitCount"), 0) AS "visitCount",
-                COALESCE(json_agg(json_build_object(
-                        'id', urls.id,
-                        'shortUrl', urls."shortUrl",
-                        'url', urls.url,
-                        'visitCount', urls."visitCount"
-                    ))
-                    FILTER (WHERE urls."userId" IS NOT NULL),
-                    '[]'
-                ) AS "shortenedUrls"
-            FROM users
-            LEFT JOIN urls ON users.id = urls."userId"
-            WHERE users.id = $1
-            GROUP BY users.id;
-        `;
-
-        const user = (await connection.query(query, [id])).rows[0];
+        const user = (await userRepository.getUser(id)).rows[0];
         if (!user) {
             res.sendStatus(404);
             return;
