@@ -1,15 +1,14 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { connection } from "../database/index.js";
+import { authRepository } from "../repositories/auth.reposotiries.js";
 
 async function signUp(req, res) {
     const { name, email, password } = res.locals.body;
 
     try {
-        const query = `INSERT INTO users (name, email, "passwordHash") VALUES ($1, $2, $3);`;
         const passwordHash = bcrypt.hashSync(password, 10);
 
-        await connection.query(query, [name, email, passwordHash]);
+        await authRepository.signUp(name, email, passwordHash);
 
         res.sendStatus(201);
     } catch (error) {
@@ -22,7 +21,7 @@ async function singIn(req, res) {
     const { email, password } = res.locals.body;
 
     try {
-        const user = (await connection.query(`SELECT * FROM users WHERE email = $1;`, [email])).rows[0];
+        const user = (await authRepository.userExist(email)).rows[0];
         if (!user) {
             res.sendStatus(401);
             return;
@@ -38,10 +37,7 @@ async function singIn(req, res) {
             userId: user.id
         }, process.env.TOKEN_SECRET);
 
-        await connection.query(`INSERT INTO sessions ("userId", token) VALUES ($1, $2);`,[
-            user.id,
-            token
-        ])
+        await authRepository.signIn(user.userId, token);
 
         res.status(200).send({ token });
     } catch (error) {

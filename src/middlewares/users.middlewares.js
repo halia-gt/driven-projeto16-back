@@ -1,5 +1,4 @@
 import { connection } from "../database/index.js";
-import { signInSchema, signUpSchema } from "../schemas/users.schemas.js";
 
 async function signUpEmailValidation(req, res, next) {
     const { email } = res.locals.body;
