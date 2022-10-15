@@ -7,16 +7,25 @@ async function authValidation(req, res, next) {
         res.sendStatus(401);
         return;
     }
+    let user;
 
     try {
-        const user = jwt.verify(token, process.env.TOKEN_SECRET);
+        user = jwt.verify(token, process.env.TOKEN_SECRET);
+
+    } catch (error) {
+        res.sendStatus(404);
+        return;
+    }
+
+    try {
+        
         const session = (await connection.query(`SELECT * FROM sessions WHERE "userId" = $1 AND token = $2;`,[
             user.userId,
             token
         ])).rows[0];
 
         if (!session) {
-            res.sendStatus(401);
+            res.sendStatus(404);
             return;
         }
 
